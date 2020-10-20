@@ -12,6 +12,7 @@ from nltk.tokenize import word_tokenize
 import random
 import json
 
+from plotting import create_plot
 """
 This script will load the file of tweets which was downloaded by main.py, and perform sentiment analysis on them.
 
@@ -98,5 +99,9 @@ classifier = NaiveBayesClassifier.train(train_data)
 
 real_tweets = load_real_tweets()
 cleaned_tweets = [remove_noise(word_tokenize(tweet)) for tweet in real_tweets]
+p_n_array = []
 for tweet, rt in zip(cleaned_tweets, real_tweets):
-    print(f"{classifier.classify(dict([token, True] for token in tweet))}, {rt}")
+    pos_neg = classifier.classify(dict([token, True] for token in tweet))
+    p_n_array.append(pos_neg)
+    print(f"{pos_neg}, {rt}")
+create_plot(p_n_array)
