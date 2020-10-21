@@ -14,7 +14,8 @@ import json
 
 from plotting import create_plot
 """
-This script will load the file of tweets which was downloaded by main.py, and perform sentiment analysis on them.
+This script will load the file of tweets which was downloaded by search_analyze.py, and perform sentiment
+analysis on them.
 
 It prints out the list of tweets, categorized as "positive" or "negative"
 """

@@ -1,8 +1,15 @@
 import tweepy
 import json
+import argparse
 
 example_trends = "/Users/daniellefevre/PycharmProjects/untitled2/example_data_new.json"
 twitter_keys = "/Users/daniellefevre/PycharmProjects/untitled2/twitterkeys.txt"
+
+arg = argparse.ArgumentParser()
+arg.add_argument("query")
+args = arg.parse_args()
+query = args.query
+
 
 
 def get_api_keys(keyfile):
@@ -36,20 +43,19 @@ def download_twitter_data(keys):
     return api.trends_place(ny_code)[0]
 
 
-def search_tweets(keys):
+def search_tweets(keys, search_query):
     auth = tweepy.AppAuthHandler(keys["API key"], keys["Secret key"])
     api = tweepy.API(auth)
-    tweets = api.search("$TSLA", lang="en", count=50)
+    tweets = api.search(search_query, lang="en", count=50)
     return tweets
 
 
-def cursor_search(keys):
+def cursor_search(keys, search_query):
     auth = tweepy.AppAuthHandler(keys["API key"], keys["Secret key"])
     api = tweepy.API(auth)
-    query = "$TSLA"
     language = "en"
     tweets_to_get = 50
-    new_tweets = tweepy.Cursor(api.search, q=query, lang=language)
+    new_tweets = tweepy.Cursor(api.search, q=search_query, lang=language)
     tweet_list = [status.text for status in new_tweets.items(tweets_to_get)]
     return tweet_list
 
@@ -69,7 +75,7 @@ api_keys = get_api_keys(twitter_keys)
 # Download Twitter data
 # data = download_twitter_data(api_keys)
 # tweets = search_tweets(api_keys)
-tweets = cursor_search(api_keys)
+tweets = cursor_search(api_keys, query)
 cleaned_tweets = cleanup_tweets(tweets)
 print(cleaned_tweets)
 # Save data to file
