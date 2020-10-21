@@ -16,7 +16,7 @@ It prints out the list of tweets, categorized as "positive" or "negative",
 and also visualizes the result in a pie chart
 """
 
-DOWNLOADED_TWEETS = "/Users/daniellefevre/PycharmProjects/untitled2/example_data_new.json"
+DOWNLOADED_TWEETS = "/Users/daniellefevre/PycharmProjects/untitled2/new_tweets_AAPL.json"
 
 
 def get_all_words(cleaned_tokens_list):

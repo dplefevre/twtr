@@ -11,15 +11,14 @@ args = arg.parse_args()
 query = args.query
 
 
-
 def get_api_keys(keyfile):
     """Load API keys from local textfile"""
     with open(keyfile, "r") as f:
         file_data = f.readlines()
     keys = {}
     for line in file_data:
-        type, value = line.split(": ")
-        keys[type] = value.strip()
+        key_type, value = line.split(": ")
+        keys[key_type] = value.strip()
     return keys
 
 
@@ -29,9 +28,9 @@ def list_trends(trendfile):
     return trend_data
 
 
-def write_json_to_file(json_data, filename):
+def write_json_to_file(json_data, fname):
     """Save Twitter data to a file, to avoid calling API more than needed"""
-    with open(filename, "w") as f:
+    with open(fname, "w") as f:
         json.dump(json_data, f)
 
 
@@ -70,6 +69,15 @@ def cleanup_tweets(list_of_tweets):
     return new_list
 
 
+def cleanup_query(search_query):
+    for symbol in ["@", "#", "$"]:
+        if symbol in search_query:
+            clean_query = search_query.replace(symbol, "")
+        else:
+            clean_query = search_query
+    return clean_query
+
+
 # Load api keys
 api_keys = get_api_keys(twitter_keys)
 # Download Twitter data
@@ -79,5 +87,6 @@ tweets = cursor_search(api_keys, query)
 cleaned_tweets = cleanup_tweets(tweets)
 print(cleaned_tweets)
 # Save data to file
-write_json_to_file(tweets, example_trends)
+filename = f"/Users/daniellefevre/PycharmProjects/untitled2/new_tweets_{cleanup_query(query)}.json"
+write_json_to_file(tweets, filename)
 
