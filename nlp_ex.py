@@ -1,68 +1,39 @@
+import json
+import random
+
 from nltk.corpus import twitter_samples
-import re
-import string
-
-from nltk.tag import pos_tag
-from nltk.stem.wordnet import WordNetLemmatizer
-
 from nltk.corpus import stopwords
 from nltk import NaiveBayesClassifier
 from nltk.tokenize import word_tokenize
 
-import random
-import json
-
+from twitter_utilities import remove_noise
 from plotting import create_plot
 """
 This script will load the file of tweets which was downloaded by search_analyze.py, and perform sentiment
 analysis on them.
 
-It prints out the list of tweets, categorized as "positive" or "negative"
+It prints out the list of tweets, categorized as "positive" or "negative", 
+and also visualizes the result in a pie chart
 """
 
 DOWNLOADED_TWEETS = "/Users/daniellefevre/PycharmProjects/untitled2/example_data_new.json"
 
 
-def remove_noise(tweet_tokens, stop_words = ()):
-
-    cleaned_tokens = []
-
-    for token, tag in pos_tag(tweet_tokens):
-        token = re.sub('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|'\
-                       '(?:%[0-9a-fA-F][0-9a-fA-F]))+','', token)
-        token = re.sub("(@[A-Za-z0-9_]+)", "", token)
-
-        if tag.startswith("NN"):
-            pos = 'n'
-        elif tag.startswith('VB'):
-            pos = 'v'
-        else:
-            pos = 'a'
-
-        lemmatizer = WordNetLemmatizer()
-        token = lemmatizer.lemmatize(token, pos)
-
-        if len(token) > 0 and token not in string.punctuation and token.lower() not in stop_words:
-            cleaned_tokens.append(token.lower())
-    return cleaned_tokens
-
-
 def get_all_words(cleaned_tokens_list):
-    for tokens in cleaned_tokens_list:
-        for token in tokens:
+    for tkns in cleaned_tokens_list:
+        for token in tkns:
             yield token
 
 
 def get_tweets_for_models(cleaned_tokens_list):
-    for tweet_tokens in cleaned_tokens_list:
-        yield dict([token, True] for token in tweet_tokens)
+    for twt_tokens in cleaned_tokens_list:
+        yield dict([token, True] for token in twt_tokens)
 
 
 def load_real_tweets():
     with open(DOWNLOADED_TWEETS, "r") as f:
-        real_tweets = json.load(f)
-    return real_tweets
-
+        downloaded_tweets = json.load(f)
+    return downloaded_tweets
 
 
 positive_tweets = twitter_samples.strings('positive_tweets.json')
