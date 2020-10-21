@@ -6,7 +6,7 @@ from nltk.corpus import stopwords
 from nltk import NaiveBayesClassifier
 from nltk.tokenize import word_tokenize
 
-from twitter_utilities import remove_noise
+from twitter_utilities import cleanup_query, get_search_queries, remove_noise
 from plotting import create_plot
 """
 This script will load the file of tweets which was downloaded by search_analyze.py, and perform sentiment
@@ -30,8 +30,9 @@ def get_tweets_for_models(cleaned_tokens_list):
         yield dict([token, True] for token in twt_tokens)
 
 
-def load_real_tweets():
-    with open(DOWNLOADED_TWEETS, "r") as f:
+def load_real_tweets(search_query):
+    tweet_file = f"/Users/daniellefevre/PycharmProjects/untitled2/new_tweets_{search_query}.json"
+    with open(tweet_file, "r") as f:
         downloaded_tweets = json.load(f)
     return downloaded_tweets
 
@@ -69,11 +70,17 @@ test_data = dataset[7000:]
 
 classifier = NaiveBayesClassifier.train(train_data)
 
-real_tweets = load_real_tweets()
-cleaned_tweets = [remove_noise(word_tokenize(tweet)) for tweet in real_tweets]
-p_n_array = []
-for tweet, rt in zip(cleaned_tweets, real_tweets):
-    pos_neg = classifier.classify(dict([token, True] for token in tweet))
-    p_n_array.append(pos_neg)
-    print(f"{pos_neg}, {rt}")
-create_plot(p_n_array)
+
+# Load search query list and perform analysis on each
+queries = get_search_queries()
+clean_queries = [cleanup_query(query) for query in queries]
+
+for clean_query in clean_queries:
+    real_tweets = load_real_tweets(clean_query)
+    cleaned_tweets = [remove_noise(word_tokenize(tweet)) for tweet in real_tweets]
+    p_n_array = []
+    for tweet, rt in zip(cleaned_tweets, real_tweets):
+        pos_neg = classifier.classify(dict([token, True] for token in tweet))
+        p_n_array.append(pos_neg)
+        print(f"{pos_neg}, {rt}")
+    create_plot(clean_query, p_n_array)
