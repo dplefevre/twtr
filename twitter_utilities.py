@@ -53,7 +53,7 @@ def get_api_keys(keyfile):
 
 def get_search_queries():
     log = logging.getLogger("twitter_utilities.get_search_queries")
-    QUERY_FILE = "/Users/daniellefevre/PycharmProjects/untitled2/queries.txt"
+    QUERY_FILE = "/Users/daniellefevre/PycharmProjects/tweet_analyzer/queries.txt"
     with open(QUERY_FILE, "r") as f:
         query_list = f.readlines()
     query_list = [query.strip() for query in query_list]

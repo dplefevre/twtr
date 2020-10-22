@@ -42,9 +42,11 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 handler.setFormatter(formatter)
 root.addHandler(handler)
 
+runtime = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+
 
 # Load api keys
-twitter_keys = "/Users/daniellefevre/PycharmProjects/untitled2/twitterkeys.txt"
+twitter_keys = "/Users/daniellefevre/PycharmProjects/tweet_analyzer/twitterkeys.txt"
 api_keys = get_api_keys(twitter_keys)
 # Download Twitter data
 # data = download_twitter_data(api_keys)
@@ -59,6 +61,6 @@ for query in queries:
     filtered_tweets = filter_tweets(cleaned_tweets)
     print(cleaned_tweets)
     # Save data to file
-    filename = f"/Users/daniellefevre/PycharmProjects/untitled2/new_tweets_{cleanup_query(query)}.json"
+    filename = f"/Users/daniellefevre/PycharmProjects/tweet_analyzer/new_tweets_{cleanup_query(query)}_{runtime}.json"
     write_json_to_file(tweets, filename)
 
