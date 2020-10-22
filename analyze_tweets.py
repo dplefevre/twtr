@@ -1,5 +1,8 @@
 import json
+import logging
+import os
 import random
+import sys
 
 from nltk.corpus import twitter_samples
 from nltk.corpus import stopwords
@@ -15,8 +18,6 @@ analysis on them.
 It prints out the list of tweets, categorized as "positive" or "negative", 
 and also visualizes the result in a pie chart
 """
-
-DOWNLOADED_TWEETS = "/Users/daniellefevre/PycharmProjects/untitled2/new_tweets_AAPL.json"
 
 
 def get_all_words(cleaned_tokens_list):
@@ -34,9 +35,17 @@ def load_real_tweets(search_query):
     tweet_file = f"/Users/daniellefevre/PycharmProjects/untitled2/new_tweets_{search_query}.json"
     with open(tweet_file, "r") as f:
         downloaded_tweets = json.load(f)
+    logging.info(f"Loaded tweets from file: {os.path.basename(tweet_file)}")
     return downloaded_tweets
 
 
+root = logging.getLogger()
+root.setLevel(logging.INFO)
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+root.addHandler(handler)
 positive_tweets = twitter_samples.strings('positive_tweets.json')
 negative_tweets = twitter_samples.strings('negative_tweets.json')
 test = twitter_samples.strings('tweets.20150430-223406.json')
@@ -75,12 +84,12 @@ classifier = NaiveBayesClassifier.train(train_data)
 queries = get_search_queries()
 clean_queries = [cleanup_query(query) for query in queries]
 
-for clean_query in clean_queries:
+for query, clean_query in zip(queries, clean_queries):
+    logging.info(f"Analyzing query: {query}")
     real_tweets = load_real_tweets(clean_query)
     cleaned_tweets = [remove_noise(word_tokenize(tweet)) for tweet in real_tweets]
     p_n_array = []
     for tweet, rt in zip(cleaned_tweets, real_tweets):
         pos_neg = classifier.classify(dict([token, True] for token in tweet))
         p_n_array.append(pos_neg)
-        print(f"{pos_neg}, {rt}")
-    create_plot(clean_query, p_n_array)
+    # create_plot(clean_query, p_n_array)

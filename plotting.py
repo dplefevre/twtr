@@ -8,3 +8,5 @@ def create_plot(query, sent_list):
     plt.title(query)
     plt.legend()
     plt.show()
+
+

@@ -2,8 +2,12 @@
   <dictionary name="daniellefevre">
     <words>
       <w>daniellefevre</w>
+      <w>fname</w>
+      <w>keyfile</w>
       <w>lemmatizer</w>
+      <w>textfile</w>
       <w>tkns</w>
+      <w>trendfile</w>
       <w>twitterkeys</w>
     </words>
   </dictionary>

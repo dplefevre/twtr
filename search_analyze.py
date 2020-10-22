@@ -1,7 +1,8 @@
+import datetime
 import tweepy
 import json
 
-from twitter_utilities import cleanup_query, get_api_keys, get_search_queries
+from twitter_utilities import cleanup_query, filter_tweets, get_api_keys, get_search_queries
 
 
 def write_json_to_file(json_data, fname):
@@ -37,10 +38,13 @@ api_keys = get_api_keys(twitter_keys)
 # data = download_twitter_data(api_keys)
 # tweets = search_tweets(api_keys)
 
+# Runtime (for file name)
+
 queries = get_search_queries()
 for query in queries:
     tweets = cursor_search(api_keys, query)
     cleaned_tweets = cleanup_tweets(tweets)
+    filtered_tweets = filter_tweets(cleaned_tweets)
     print(cleaned_tweets)
     # Save data to file
     filename = f"/Users/daniellefevre/PycharmProjects/untitled2/new_tweets_{cleanup_query(query)}.json"
