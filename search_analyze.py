@@ -1,6 +1,8 @@
 import datetime
 import tweepy
 import json
+import logging
+import sys
 
 from twitter_utilities import cleanup_query, filter_tweets, get_api_keys, get_search_queries
 
@@ -29,6 +31,16 @@ def cleanup_tweets(list_of_tweets):
         tweet = tweet.replace("\n", " ")
         new_list.append(tweet)
     return new_list
+
+
+# Set up logging
+root = logging.getLogger()
+root.setLevel(logging.INFO)
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+root.addHandler(handler)
 
 
 # Load api keys

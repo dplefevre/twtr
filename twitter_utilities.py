@@ -1,8 +1,6 @@
-import inspect
 import logging
 import re
 import string
-import sys
 
 from nltk.tag import pos_tag
 from nltk.stem.wordnet import WordNetLemmatizer
@@ -15,6 +13,7 @@ log.setLevel(logging.INFO)
 # handler.setFormatter(formatter)
 # log.addHandler(handler)
 
+
 def cleanup_query(search_query):
     for symbol in ["@", "#", "$"]:
         if symbol in search_query:
@@ -25,11 +24,12 @@ def cleanup_query(search_query):
 
 
 def filter_tweets(tweet_list):
+    log = logging.getLogger("twitter_utilities.filter_tweets")
     """This function takes a list of tweets and attempts to
     remove those that contain scams, sales pitches, or otherwise
     useless content"""
     filtered_tweets = []
-    stop_content = ["link in bio", "giveaway", "tutorial", "chat", "we help you"]
+    stop_content = ["link in bio", "giveaway", "tutorial", "chat", "we help you", "trade setup"]
     for tweet in tweet_list:
         intersection = [content for content in stop_content if content in tweet.lower()]
         if len(intersection) == 0:
