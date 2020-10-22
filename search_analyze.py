@@ -1,52 +1,16 @@
+import datetime
 import tweepy
 import json
-import argparse
+import logging
+import sys
 
-example_trends = "/Users/daniellefevre/PycharmProjects/untitled2/example_data_new.json"
-twitter_keys = "/Users/daniellefevre/PycharmProjects/untitled2/twitterkeys.txt"
-
-arg = argparse.ArgumentParser()
-arg.add_argument("query")
-args = arg.parse_args()
-query = args.query
-
-
-def get_api_keys(keyfile):
-    """Load API keys from local textfile"""
-    with open(keyfile, "r") as f:
-        file_data = f.readlines()
-    keys = {}
-    for line in file_data:
-        key_type, value = line.split(": ")
-        keys[key_type] = value.strip()
-    return keys
-
-
-def list_trends(trendfile):
-    with open(trendfile) as f:
-        trend_data = json.load(f)
-    return trend_data
+from twitter_utilities import cleanup_query, filter_tweets, get_api_keys, get_search_queries
 
 
 def write_json_to_file(json_data, fname):
     """Save Twitter data to a file, to avoid calling API more than needed"""
     with open(fname, "w") as f:
         json.dump(json_data, f)
-
-
-def download_twitter_data(keys):
-    """Download a set of tweets using the Twitter API"""
-    ny_code = "2458833"
-    auth = tweepy.AppAuthHandler(keys["API key"], keys["Secret key"])
-    api = tweepy.API(auth)
-    return api.trends_place(ny_code)[0]
-
-
-def search_tweets(keys, search_query):
-    auth = tweepy.AppAuthHandler(keys["API key"], keys["Secret key"])
-    api = tweepy.API(auth)
-    tweets = api.search(search_query, lang="en", count=50)
-    return tweets
 
 
 def cursor_search(keys, search_query):
@@ -69,24 +33,34 @@ def cleanup_tweets(list_of_tweets):
     return new_list
 
 
-def cleanup_query(search_query):
-    for symbol in ["@", "#", "$"]:
-        if symbol in search_query:
-            clean_query = search_query.replace(symbol, "")
-        else:
-            clean_query = search_query
-    return clean_query
+# Set up logging
+root = logging.getLogger()
+root.setLevel(logging.INFO)
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+root.addHandler(handler)
+
+runtime = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
 
 # Load api keys
+twitter_keys = "/Users/daniellefevre/PycharmProjects/tweet_analyzer/twitterkeys.txt"
 api_keys = get_api_keys(twitter_keys)
 # Download Twitter data
 # data = download_twitter_data(api_keys)
 # tweets = search_tweets(api_keys)
-tweets = cursor_search(api_keys, query)
-cleaned_tweets = cleanup_tweets(tweets)
-print(cleaned_tweets)
-# Save data to file
-filename = f"/Users/daniellefevre/PycharmProjects/untitled2/new_tweets_{cleanup_query(query)}.json"
-write_json_to_file(tweets, filename)
+
+# Runtime (for file name)
+
+queries = get_search_queries()
+for query in queries:
+    tweets = cursor_search(api_keys, query)
+    cleaned_tweets = cleanup_tweets(tweets)
+    filtered_tweets = filter_tweets(cleaned_tweets)
+    print(cleaned_tweets)
+    # Save data to file
+    filename = f"/Users/daniellefevre/PycharmProjects/tweet_analyzer/new_tweets_{cleanup_query(query)}_{runtime}.json"
+    write_json_to_file(tweets, filename)
 
