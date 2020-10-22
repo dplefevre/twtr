@@ -19,7 +19,8 @@ It prints out the list of tweets, categorized as "positive" or "negative",
 and also visualizes the result in a pie chart
 """
 
-class new_classifier():
+
+class NewClassifier:
 
     def __init__(self):
         positive_tweets = twitter_samples.strings('positive_tweets.json')
@@ -90,7 +91,7 @@ def classify_tweets():
         handler.setFormatter(formatter)
         root.addHandler(handler)
 
-    classifier = new_classifier()
+    classifier = NewClassifier()
 
     # Load search query list and perform analysis on each
     queries = get_search_queries()
@@ -107,7 +108,6 @@ def classify_tweets():
         # create_plot(clean_query, p_n_array)
         logging.info(f"Classified {query}")
         logging.info(f"Result: {(p_n_array.count('Positive')/p_n_array.count('Negative'))} Positive/Negative")
-    root, handler, formatter = None, None, None
 
 
 if __name__ == "__main__":
