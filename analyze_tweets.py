@@ -1,3 +1,4 @@
+import datetime
 import json
 import logging
 import os
@@ -9,10 +10,10 @@ from nltk.corpus import stopwords
 from nltk import NaiveBayesClassifier
 from nltk.tokenize import word_tokenize
 
-from twitter_utilities import cleanup_query, get_search_queries, remove_noise
+from twitter_utilities import cleanup_query, get_latest_tweet_file, get_search_queries, remove_noise
 from plotting import create_plot
 """
-This script will load the file of tweets which was downloaded by search_analyze.py, and perform sentiment
+This script will load the file of tweets which was downloaded by download_tweets.py, and perform sentiment
 analysis on them.
 
 It prints out the list of tweets, categorized as "positive" or "negative", 
@@ -68,28 +69,18 @@ def get_tweets_for_models(cleaned_tokens_list):
         yield dict([token, True] for token in twt_tokens)
 
 
-def load_real_tweets(search_query):
+def load_real_tweets(cleaned_query):
     log = logging.getLogger("root.load_real_tweets")
-    # tweet_file = f"/Users/daniellefevre/PycharmProjects/untitled2/new_tweets_{search_query}.json"
-    tweet_file = f"/Users/daniellefevre/PycharmProjects/tweet_analyzer/new_tweets_AAPL_20201022123003.json"
+    tweet_file = get_latest_tweet_file(cleaned_query)
     with open(tweet_file, "r") as f:
         downloaded_tweets = json.load(f)
-    logging.info(f"Loaded tweets from file: {os.path.basename(tweet_file)}")
+    log.info(f"Loaded tweets from file: {os.path.basename(tweet_file)}")
     return downloaded_tweets
 
 
 def classify_tweets():
 
     print("starting to classify")
-
-    root = logging.getLogger()
-    root.setLevel(logging.INFO)
-    if not root.handlers:
-        handler = logging.StreamHandler(sys.stdout)
-        handler.setLevel(logging.INFO)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        handler.setFormatter(formatter)
-        root.addHandler(handler)
 
     classifier = NewClassifier()
 
@@ -113,9 +104,15 @@ def classify_tweets():
 if __name__ == "__main__":
     root = logging.getLogger()
     root.setLevel(logging.INFO)
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-    root.addHandler(handler)
+    if not root.handlers:
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        sh = logging.StreamHandler(sys.stdout)
+        sh.setLevel(logging.INFO)
+        sh.setFormatter(formatter)
+        root.addHandler(sh)
+        fh = logging.FileHandler(f"/Users/daniellefevre/PycharmProjects/tweet_analyzer/logs/analyze_tweets.log")
+        fh.setLevel(logging.INFO)
+        fh.setFormatter(formatter)
+    root.info(f"analyze_tweets.py is now starting at {datetime.datetime.now()}")
     classify_tweets()
+    root.info(f"analyze_tweets.py is now completing at {datetime.datetime.now()}")

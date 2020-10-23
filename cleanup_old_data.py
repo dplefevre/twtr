@@ -1,23 +1,32 @@
-import datetime
+import logging
 import pathlib
-import re
+import sys
+
+from twitter_utilities import sort_by_datetime
 
 
-def sort_by_datetime(file_name):
-    name = pathlib.PurePath(file_name).stem
-    dt_string = name.split("_")[-1]
-    dt = datetime.datetime.strptime(dt_string, "%Y%m%d%H%M%S")
-    return dt
+if __name__ == "__main__":
+    # Set up logging
+    root = logging.getLogger()
+    root.setLevel(logging.INFO)
+    if not root.handlers:
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        sh = logging.StreamHandler(sys.stdout)
+        sh.setLevel(logging.INFO)
+        sh.setFormatter(formatter)
+        root.addHandler(sh)
+        fh = logging.FileHandler(f"/Users/daniellefevre/PycharmProjects/tweet_analyzer/logs/download_tweets.log")
+        fh.setLevel(logging.INFO)
+        fh.setFormatter(formatter)
+        root.addHandler(fh)
 
+    data_folder = "/Users/daniellefevre/PycharmProjects/tweet_analyzer"
 
-data_folder = "/Users/daniellefevre/PycharmProjects/tweet_analyzer"
+    data_path = pathlib.Path(data_folder)
 
-data_path = pathlib.Path(data_folder)
+    files = list(data_path.glob("*.json"))
+    files.sort(key=sort_by_datetime)
+    max_datetime = sort_by_datetime(files[-1])
 
-files = list(data_path.glob("*.json"))
-print(files)
-files.sort(key=sort_by_datetime)
-max_datetime = sort_by_datetime(files[-1])
-
-[pathlib.Path.unlink(file) for file in files
-    if max_datetime.strftime("%Y%m%d%H%M%S") not in str(file)]
+    [pathlib.Path.unlink(file) for file in files
+        if max_datetime.strftime("%Y%m%d%H%M%S") not in str(file)]

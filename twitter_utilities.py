@@ -1,4 +1,6 @@
+import datetime
 import logging
+import pathlib
 import re
 import string
 
@@ -51,6 +53,23 @@ def get_api_keys(keyfile):
     return keys
 
 
+def get_latest_tweet_file(cleaned_query):
+    log = logging.getLogger("twitter_utilities.get_latest_tweet_file")
+    data_folder = "/Users/daniellefevre/PycharmProjects/tweet_analyzer"
+    data_path = pathlib.Path(data_folder)
+    tweet_files = list(data_path.glob("*.json"))
+    tweet_files.sort(key=sort_by_datetime)
+    max_datetime = sort_by_datetime(tweet_files[-1]).strftime("%Y%m%d%H%M%S")
+    latest_file = None
+    for file in tweet_files:
+        if cleaned_query in str(file) and max_datetime in str(file):
+            latest_file = file
+            break
+    if latest_file is None:
+        log.error(f"No tweet file to load for {cleaned_query}")
+    return latest_file
+
+
 def get_search_queries():
     log = logging.getLogger("twitter_utilities.get_search_queries")
     # QUERY_FILE = "/Users/daniellefevre/PycharmProjects/tweet_analyzer/queries.txt"
@@ -85,3 +104,9 @@ def remove_noise(tweet_tokens, stop_words=()):
             cleaned_tokens.append(token.lower())
     return cleaned_tokens
 
+
+def sort_by_datetime(file_name):
+    name = pathlib.PurePath(file_name).stem
+    dt_string = name.split("_")[-1]
+    dt = datetime.datetime.strptime(dt_string, "%Y%m%d%H%M%S")
+    return dt
