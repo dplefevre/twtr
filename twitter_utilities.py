@@ -53,9 +53,8 @@ def get_api_keys(keyfile):
     return keys
 
 
-def get_latest_tweet_file(cleaned_query):
+def get_latest_tweet_file(data_folder, cleaned_query):
     log = logging.getLogger("twitter_utilities.get_latest_tweet_file")
-    data_folder = "/Users/daniellefevre/PycharmProjects/tweet_analyzer"
     data_path = pathlib.Path(data_folder)
     tweet_files = list(data_path.glob("*.json"))
     tweet_files.sort(key=sort_by_datetime)
@@ -70,11 +69,9 @@ def get_latest_tweet_file(cleaned_query):
     return latest_file
 
 
-def get_search_queries():
+def get_search_queries(query_file):
     log = logging.getLogger("twitter_utilities.get_search_queries")
-    # QUERY_FILE = "/Users/daniellefevre/PycharmProjects/tweet_analyzer/queries.txt"
-    QUERY_FILE = "queries.txt"
-    with open(QUERY_FILE, "r") as f:
+    with open(query_file, "r") as f:
         query_list = f.readlines()
     query_list = [query.strip() for query in query_list]
     log.info(f"Search queries: {query_list}")

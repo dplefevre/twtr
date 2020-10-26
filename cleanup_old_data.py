@@ -1,3 +1,4 @@
+import configparser
 import logging
 import pathlib
 import sys
@@ -6,7 +7,12 @@ from twitter_utilities import sort_by_datetime
 
 
 if __name__ == "__main__":
+    # Read config file
+    config = configparser.ConfigParser()
+    config.read("/Users/daniellefevre/PycharmProjects/tweet_analyzer/configuration.ini")
+    configs = config["configs"]
     # Set up logging
+    log_dir = configs["log_dir"]
     root = logging.getLogger()
     root.setLevel(logging.INFO)
     if not root.handlers:
@@ -15,14 +21,14 @@ if __name__ == "__main__":
         sh.setLevel(logging.INFO)
         sh.setFormatter(formatter)
         root.addHandler(sh)
-        fh = logging.FileHandler(f"/Users/daniellefevre/PycharmProjects/tweet_analyzer/logs/download_tweets.log")
+        fh = logging.FileHandler(f"{log_dir}/cleanup_old_data.log")
         fh.setLevel(logging.INFO)
         fh.setFormatter(formatter)
         root.addHandler(fh)
 
-    data_folder = "/Users/daniellefevre/PycharmProjects/tweet_analyzer"
+    data_dir = configs["data_dir"]
 
-    data_path = pathlib.Path(data_folder)
+    data_path = pathlib.Path(data_dir)
 
     files = list(data_path.glob("*.json"))
     files.sort(key=sort_by_datetime)

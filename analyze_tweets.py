@@ -1,3 +1,4 @@
+import configparser
 import datetime
 import json
 import logging
@@ -69,28 +70,28 @@ def get_tweets_for_models(cleaned_tokens_list):
         yield dict([token, True] for token in twt_tokens)
 
 
-def load_real_tweets(cleaned_query):
+def load_real_tweets(data_dir, cleaned_query):
     log = logging.getLogger("root.load_real_tweets")
-    tweet_file = get_latest_tweet_file(cleaned_query)
+    tweet_file = get_latest_tweet_file(data_dir, cleaned_query)
     with open(tweet_file, "r") as f:
         downloaded_tweets = json.load(f)
     log.info(f"Loaded tweets from file: {os.path.basename(tweet_file)}")
     return downloaded_tweets
 
 
-def classify_tweets():
+def classify_tweets(data_folder, search_queries):
 
     print("starting to classify")
 
     classifier = NewClassifier()
 
     # Load search query list and perform analysis on each
-    queries = get_search_queries()
+    queries = get_search_queries(search_queries)
     clean_queries = [cleanup_query(query) for query in queries]
 
     for query, clean_query in zip(queries, clean_queries):
         logging.info(f"Analyzing query: {query}")
-        real_tweets = load_real_tweets(clean_query)
+        real_tweets = load_real_tweets(data_folder, clean_query)
         cleaned_tweets = [remove_noise(word_tokenize(tweet)) for tweet in real_tweets]
         p_n_array = []
         for tweet, rt in zip(cleaned_tweets, real_tweets):
@@ -102,6 +103,13 @@ def classify_tweets():
 
 
 if __name__ == "__main__":
+    # Read config file
+    config = configparser.ConfigParser()
+    config.read("/Users/daniellefevre/PycharmProjects/tweet_analyzer/configuration.ini")
+    configs = config["configs"]
+
+    # Set up logging
+    log_dir = configs["log_dir"]
     root = logging.getLogger()
     root.setLevel(logging.INFO)
     if not root.handlers:
@@ -110,9 +118,11 @@ if __name__ == "__main__":
         sh.setLevel(logging.INFO)
         sh.setFormatter(formatter)
         root.addHandler(sh)
-        fh = logging.FileHandler(f"/Users/daniellefevre/PycharmProjects/tweet_analyzer/logs/analyze_tweets.log")
+        fh = logging.FileHandler(f"{log_dir}/analyze_tweets.log")
         fh.setLevel(logging.INFO)
         fh.setFormatter(formatter)
     root.info(f"analyze_tweets.py is now starting at {datetime.datetime.now()}")
-    classify_tweets()
+    query_file = configs["search_queries"]
+    data_dir = configs["data_dir"]
+    classify_tweets(data_dir, query_file)
     root.info(f"analyze_tweets.py is now completing at {datetime.datetime.now()}")

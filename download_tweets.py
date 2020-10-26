@@ -1,3 +1,4 @@
+import configparser
 import datetime
 import tweepy
 import json
@@ -34,7 +35,13 @@ def cleanup_tweets(list_of_tweets):
 
 
 if __name__ == "__main__":
+    # Read config file
+    config = configparser.ConfigParser()
+    config.read("/Users/daniellefevre/PycharmProjects/tweet_analyzer/configuration.ini")
+    configs = config["configs"]
+
     # Set up logging
+    log_dir = configs["log_dir"]
     root = logging.getLogger()
     root.setLevel(logging.INFO)
     if not root.handlers:
@@ -43,7 +50,7 @@ if __name__ == "__main__":
         sh.setLevel(logging.INFO)
         sh.setFormatter(formatter)
         root.addHandler(sh)
-        fh = logging.FileHandler(f"/Users/daniellefevre/PycharmProjects/tweet_analyzer/logs/download_tweets.log")
+        fh = logging.FileHandler(f"{log_dir}/download_tweets.log")
         fh.setLevel(logging.INFO)
         fh.setFormatter(formatter)
         root.addHandler(fh)
@@ -52,21 +59,22 @@ if __name__ == "__main__":
     runtime = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
     # Load api keys
-    twitter_keys = "/Users/daniellefevre/PycharmProjects/tweet_analyzer/twitterkeys.txt"
+    twitter_keys = configs["twitter_keys"]
     api_keys = get_api_keys(twitter_keys)
+
     # Download Twitter data
-    # data = download_twitter_data(api_keys)
-    # tweets = search_tweets(api_keys)
-
-    # Runtime (for file name)
-
-    queries = get_search_queries()
+    query_file = configs["search_queries"]
+    queries = get_search_queries(query_file)
     for query in queries:
+        # Search for tweets
         tweets = cursor_search(api_keys, query)
+        # Remove noise from tweets
         cleaned_tweets = cleanup_tweets(tweets)
+        # Filter out useless tweets
         filtered_tweets = filter_tweets(cleaned_tweets)
-        print(cleaned_tweets)
         # Save data to file
-        filename = f"/Users/daniellefevre/PycharmProjects/tweet_analyzer/new_tweets_{cleanup_query(query)}_{runtime}.json"
+        filename = \
+            f"/Users/daniellefevre/PycharmProjects/tweet_analyzer/new_tweets_{cleanup_query(query)}_{runtime}.json"
         write_json_to_file(tweets, filename)
+
     root.info(f"download_tweets.py is now completing at {datetime.datetime.now()}")
